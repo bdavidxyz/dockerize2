@@ -1,4 +1,4 @@
-version: "3"
+version: "4"
 services:
   web: 
     hostname: web
@@ -8,4 +8,13 @@ services:
       dockerfile: dockerfile_web
     ports:
       - "80:80"
+
+  rails: 
+    hostname: rails
+    restart: always
+    build:
+      context: .
+      dockerfile: dockerfile_rails
+    ports:
+      - "3000:3000"
 

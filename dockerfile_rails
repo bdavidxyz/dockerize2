@@ -1,0 +1,55 @@
+FROM ubuntu:xenial
+
+RUN apt-get -y update; \
+    apt-get -y install sudo; \
+    apt-get -y install git; \
+    apt-get -y install autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev
+
+# RUN git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+
+# RUN echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
+# RUN echo 'eval "$(rbenv init -)"' >> ~/.bashrc
+# "dot" instead of "source", see https://stackoverflow.com/a/34217720/2595513
+# RUN . ~/.bashrc
+# See https://github.com/rbenv/rbenv.git
+
+# RUN git clone https://github.com/rbenv/rbenv.git ~/.rbenv \
+#   &&  echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc \
+#   &&  echo 'eval "$(rbenv init -)"' >> ~/.bashrc \
+#   &&  export PATH="$HOME/.rbenv/bin:$PATH"
+
+# RUN echo 'gem: --no-rdoc --no-ri' >> /.gemrc
+# RUN bash -l -c 'for v in $(cat /root/versions.txt); do rbenv global $v; gem install bundler; done'
+
+RUN \
+      echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
+  &&  groupadd r \
+  &&  useradd r -m -g r -g sudo
+
+USER r
+
+RUN \
+      git clone https://github.com/sstephenson/rbenv.git ~/.rbenv \
+  &&  echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc \
+  &&  echo 'eval "$(rbenv init -)"' >> ~/.bashrc \
+  &&  export PATH="$HOME/.rbenv/bin:$PATH"
+
+
+
+
+RUN rbenv version
+RUN git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+RUN rbenv install 2.6.0
+RUN rbenv global 2.6.0
+RUN ruby -v
+
+RUN echo "gem: --no-document --no-rdoc --no-ri" > ~/.gemrc
+RUN gem install bundler
+
+RUN gem env home
+RUN gem install rails 5.2.2.1
+RUN rbenv rehash
+RUN rails -v
+
+
+
