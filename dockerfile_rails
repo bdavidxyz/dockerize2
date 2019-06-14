@@ -1,55 +1,35 @@
-FROM ubuntu:xenial
+# See https://stackoverflow.com/a/47642594/2595513
+FROM ubuntu:16.04
 
-RUN apt-get -y update; \
-    apt-get -y install sudo; \
-    apt-get -y install git; \
-    apt-get -y install autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev
+ENV RBENV_ROOT=/usr/local/rbenv
+ENV PATH=$RBENV_ROOT/bin:$RBENV_ROOT/shims:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-# RUN git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake curl git zlib1g-dev \
+    libssl-dev libreadline-dev \
+    libyaml-dev libxml2-dev \
+    libxslt-dev libsqlite3-dev \
+    python-dev libxml2-dev \
+    libxslt-dev groff zip \
+    pkg-config ca-certificates \
+    && apt-get clean
 
-# RUN echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
-# RUN echo 'eval "$(rbenv init -)"' >> ~/.bashrc
-# "dot" instead of "source", see https://stackoverflow.com/a/34217720/2595513
-# RUN . ~/.bashrc
-# See https://github.com/rbenv/rbenv.git
+# Install rbenv
+RUN git clone https://github.com/rbenv/rbenv.git /usr/local/rbenv \
+    && echo '# rbenv setup' > /etc/profile.d/rbenv.sh \
+    && echo 'export RBENV_ROOT=/usr/local/rbenv' >> /etc/profile.d/rbenv.sh \
+    && echo 'export PATH="$RBENV_ROOT/bin:$PATH"' >> /etc/profile.d/rbenv.sh \
+    && echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh \
+    && chmod +x /etc/profile.d/rbenv.sh
 
-# RUN git clone https://github.com/rbenv/rbenv.git ~/.rbenv \
-#   &&  echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc \
-#   &&  echo 'eval "$(rbenv init -)"' >> ~/.bashrc \
-#   &&  export PATH="$HOME/.rbenv/bin:$PATH"
+ENV RUBY_VERSION=2.6.0
 
-# RUN echo 'gem: --no-rdoc --no-ri' >> /.gemrc
-# RUN bash -l -c 'for v in $(cat /root/versions.txt); do rbenv global $v; gem install bundler; done'
-
-RUN \
-      echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
-  &&  groupadd r \
-  &&  useradd r -m -g r -g sudo
-
-USER r
-
-RUN \
-      git clone https://github.com/sstephenson/rbenv.git ~/.rbenv \
-  &&  echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc \
-  &&  echo 'eval "$(rbenv init -)"' >> ~/.bashrc \
-  &&  export PATH="$HOME/.rbenv/bin:$PATH"
-
-
-
-
-RUN rbenv version
-RUN git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
-RUN rbenv install 2.6.0
-RUN rbenv global 2.6.0
-RUN ruby -v
-
-RUN echo "gem: --no-document --no-rdoc --no-ri" > ~/.gemrc
-RUN gem install bundler
-
-RUN gem env home
-RUN gem install rails 5.2.2.1
-RUN rbenv rehash
-RUN rails -v
-
-
-
+# install ruby-build
+RUN mkdir /usr/local/rbenv/plugins \
+    && git clone https://github.com/sstephenson/ruby-build.git /usr/local/rbenv/plugins/ruby-build \
+    && /usr/local/rbenv/plugins/ruby-build/install.sh \
+    && rbenv install ${RUBY_VERSION} \
+    && rbenv global ${RUBY_VERSION} \
+    && gem install bundler \
+    && rbenv rehash
