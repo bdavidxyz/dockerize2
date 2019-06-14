@@ -3,6 +3,8 @@ FROM ubuntu:16.04
 
 ENV RBENV_ROOT=/usr/local/rbenv
 ENV PATH=$RBENV_ROOT/bin:$RBENV_ROOT/shims:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV RUBY_VERSION=2.6.0
+ENV RAILS_VERSION=5.2.2.1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -23,7 +25,6 @@ RUN git clone https://github.com/rbenv/rbenv.git /usr/local/rbenv \
     && echo 'eval "$(rbenv init -)"' >> /etc/profile.d/rbenv.sh \
     && chmod +x /etc/profile.d/rbenv.sh
 
-ENV RUBY_VERSION=2.6.0
 
 # install ruby-build
 RUN mkdir /usr/local/rbenv/plugins \
@@ -33,3 +34,6 @@ RUN mkdir /usr/local/rbenv/plugins \
     && rbenv global ${RUBY_VERSION} \
     && gem install bundler \
     && rbenv rehash
+
+# install Rails
+RUN gem install rails -v ${RAILS_VERSION}
